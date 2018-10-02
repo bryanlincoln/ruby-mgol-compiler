@@ -223,8 +223,15 @@ class Lex
     end
 
     def error(c)
+        if c == "EOF"
+            type = "Fim de arquivo inesperado"
+        else
+            type = "Caractere inválido"
+        end
+
         erro = "\n\033[31;1mErro [linha: " + String(@file_line) + ", coluna: " + String(@file_col) + 
-                "]:\033[0m Caractere inválido \"\033[0;1m" + c + "\033[0m\"\nEsperava " + String(@transition[@state].keys.to_s)
+                "]:\033[0m " + type + " - \"\033[0;1m" + c + "\033[0m\"\nEsperava " + String(@transition[@state].keys.to_s)
+
         return erro
     end
 end
