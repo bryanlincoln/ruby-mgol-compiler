@@ -1,10 +1,11 @@
 require "./lex.rb"
+require "./syntactic.rb"
 require "pry"
 
 if $PROGRAM_NAME == __FILE__  
     # verifica se o arquivo foi passado como parâmetro
     if ARGV.length < 1
-        puts "\033[31;1mPasse o arquivo de entrada como argumento."
+        puts "\033[31;1mPasse o arquivo de entrada como argumento.\033[0m"
         exit()
     end
 
@@ -15,14 +16,7 @@ if $PROGRAM_NAME == __FILE__
     end
 
     lex = Lex.new(ARGV[0])
-  
-    loop do
-        # chamada do léxico que retorna uma hash {:lexeme, :token, :type}
-        tuple = lex.get()
+    syn = Syntactic.new(lex)
 
-        break unless tuple
-        Pry::ColorPrinter.pp(tuple)
-    end
-
-    #Pry::ColorPrinter.pp(lex.table)
+    syn.run()
 end 

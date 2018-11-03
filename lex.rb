@@ -105,18 +105,18 @@ class Lex
 
         # tabela de símbolos
         @table = {
-            :inicio     => { :lexeme => "inicio", :token => "keyword", :type => "-" },
-            :varinicio  => { :lexeme => "varinicio", :token => "keyword", :type => "-" },
-            :varfim     => { :lexeme => "varfim", :token => "keyword", :type => "-" },
-            :escreva    => { :lexeme => "escreva", :token => "keyword", :type => "-" },
-            :leia       => { :lexeme => "leia", :token => "keyword", :type => "-" },
-            :se         => { :lexeme => "se", :token => "keyword", :type => "-" },
-            :entao      => { :lexeme => "entao", :token => "keyword", :type => "-" },
-            :fimse      => { :lexeme => "fimse", :token => "keyword", :type => "-" },
-            :fim        => { :lexeme => "fim", :token => "keyword", :type => "-" },
-            :inteiro    => { :lexeme => "inteiro", :token => "keyword", :type => "-" },
-            :lit        => { :lexeme => "lit", :token => "keyword", :type => "-" },
-            :real       => { :lexeme => "real", :token => "keyword", :type => "-" }
+            :inicio     => { :lexeme => "inicio", :token => "inicio", :type => "-" },
+            :varinicio  => { :lexeme => "varinicio", :token => "varinicio", :type => "-" },
+            :varfim     => { :lexeme => "varfim", :token => "varfim", :type => "-" },
+            :escreva    => { :lexeme => "escreva", :token => "escreva", :type => "-" },
+            :leia       => { :lexeme => "leia", :token => "leia", :type => "-" },
+            :se         => { :lexeme => "se", :token => "se", :type => "-" },
+            :entao      => { :lexeme => "entao", :token => "entao", :type => "-" },
+            :fimse      => { :lexeme => "fimse", :token => "fimse", :type => "-" },
+            :fim        => { :lexeme => "fim", :token => "fim", :type => "-" },
+            :inteiro    => { :lexeme => "inteiro", :token => "inteiro", :type => "-" },
+            :lit        => { :lexeme => "lit", :token => "lit", :type => "-" },
+            :real       => { :lexeme => "real", :token => "real", :type => "-" }
         }
     end
 
@@ -157,7 +157,7 @@ class Lex
         loop do
             # get depois que o arquivo já foi fechado
             if @file.closed?
-                puts "\033[32;1mArquivo processado com sucesso!"
+                puts "\033[32;1m[Lex] Arquivo processado com sucesso!\033[0m"
                 return false
             end
 
