@@ -1,5 +1,6 @@
 require "./lex.rb"
 require "./syntactic.rb"
+require "./semantic.rb"
 require "pry"
 
 if $PROGRAM_NAME == __FILE__  
@@ -16,7 +17,11 @@ if $PROGRAM_NAME == __FILE__
     end
 
     lex = Lex.new(ARGV[0])
-    syn = Syntactic.new(lex)
+    sem = Semantic.new(lex)
+    syn = Syntactic.new(lex, sem)
 
     syn.run()
+    sem.save()
+
+    # Pry::ColorPrinter.pp(lex.table)
 end 

@@ -1,5 +1,5 @@
 class Lex
-    attr_accessor :start, :end, :transition, :state, :tokens, :file, :file_line, :file_col, :table
+    attr_accessor :start, :end, :transition, :state, :tokens, :file, :file_line, :file_col, :table, :noError
 
     def initialize(file)
         # tabela de transições
@@ -114,10 +114,12 @@ class Lex
             :entao      => { :lexeme => "entao", :token => "entao", :type => "-" },
             :fimse      => { :lexeme => "fimse", :token => "fimse", :type => "-" },
             :fim        => { :lexeme => "fim", :token => "fim", :type => "-" },
-            :inteiro    => { :lexeme => "inteiro", :token => "inteiro", :type => "-" },
-            :lit        => { :lexeme => "lit", :token => "lit", :type => "-" },
-            :real       => { :lexeme => "real", :token => "real", :type => "-" }
-        }
+            :inteiro    => { :lexeme => "inteiro", :token => "inteiro", :type => "int" },
+            :lit        => { :lexeme => "lit", :token => "lit", :type => "literal" },
+            :real       => { :lexeme => "real", :token => "real", :type => "double" }
+        } 
+
+        @noError = true
     end
 
     def run(input)
@@ -157,7 +159,9 @@ class Lex
         loop do
             # get depois que o arquivo já foi fechado
             if @file.closed?
-                puts "\033[32;1m[Lex] Arquivo processado com sucesso!\033[0m"
+                if @noError
+                    puts "\033[32;1mArquivo processado com sucesso!\033[0m"
+                end
                 return false
             end
 
@@ -172,7 +176,7 @@ class Lex
 
             # se o dfa retornou false, aconteceu algo que não devia
             unless token
-                puts error(c)
+                error("lex", c, @state.to_s, "CHAR")
                 return false
             end
 
@@ -187,6 +191,13 @@ class Lex
                     :token  => token,
                     :type   => "-"
                 }
+
+                # adiciona tipos pardão
+                if token == "Literal"
+                    tuple[:type] = "literal"
+                elsif token == "Num"
+                    tuple[:type] = "double"
+                end
 
                 # verifica, se for um id, se ele já tá na tabela e o insere
                 if token == "id"
@@ -203,7 +214,7 @@ class Lex
             # se o dfa não finalizou o processamento e o arquivo foi fechado
             elsif @file.closed?
                 # o arquivo foi finalizado antes de encontrar o final de um processamento
-                puts error(c)
+                error("lex", c, @state.to_s, "EOF")
                 return false
             
             # senão, faz a atualização das linhas e preenche o buffer
@@ -222,16 +233,56 @@ class Lex
         end
     end
 
-    def error(c)
-        if c == "EOF"
-            type = "Fim de arquivo inesperado"
-        else
-            type = "Caractere inválido"
+    def error(mod, token, code, type="unknown", additional="")
+        @noError = false
+
+        if mod == "lex"
+            modExt = "léxico"
+
+            if type == "EOF"
+                typeExt = "Fim de arquivo inesperado." # TODO verificar onde estrutura foi aberta
+            elsif type == "CHAR"
+                typeExt = "Caractere \"\033[0;1m" + token + "\033[0m\" inválido."
+            else
+                typeExt = "Erro desconhecido."
+            end
+
+        elsif mod == "syn"
+            modExt = "sintático"
+
+            if type == "unexpected"
+                typeExt = "Token \"\033[0;1m" + token + "\033[0m\" inesperado."
+            else
+                typeExt = "Erro desconhecido."
+            end
+
+        elsif mod == "sem"
+            modExt = "semântico"
+
+            if type == "undeclared"
+                typeExt = "Variável \"\033[0;1m" + token + "\033[0m\" não declarada."
+
+            elsif type == "incompatible"
+                typeExt = "Operandos \"\033[0;1m" + token[0][:lexeme] + "\033[0m\" (" + token[0][:type] + ") e \"\033[0;1m" + token[1][:lexeme] + "\033[0m\" (" + 
+                        token[1][:type] + ") com tipos incompatíveis para operador \"\033[0;1m" + additional + "\033[0m\"."
+            else
+                typeExt = "Erro desconhecido."
+            end
         end
 
-        erro = "\n\033[31;1mErro [linha: " + String(@file_line) + ", coluna: " + String(@file_col) + 
-                "]:\033[0m " + type + " - \"\033[0;1m" + c + "\033[0m\"\nEsperava " + String(@transition[@state].keys.to_s)
+        errMessage = "\n\033[31;1mErro " + modExt + " [linha: " + String(@file_line) + ", coluna: " + String(@file_col) + 
+                    "]:\033[0m \033[0;1m[#" + code + "]\033[0m " + typeExt + "\n\n"
 
-        return erro
+        puts errMessage
+        return errMessage
+    end
+
+    def update(lexeme, token)
+        lexeme_s = lexeme.to_sym
+        @table[lexeme_s] = token
+    end
+
+    def getPos()
+        return @file_line, @file_col
     end
 end

@@ -1,9 +1,13 @@
 require "csv"
 
 class Syntactic
-    attr_accessor :transitions, :lex, :grammar
+    attr_accessor :transitions, :lex, :sem, :grammar
 
-    def initialize(lex)
+    def initialize(lex, sem)
+        # incializa os auxiliares
+        @lex = lex
+        @sem = sem
+
         # inicializa a tabela de transições
         @transitions = CSV.read("syntax_table.csv", :headers => true)
         @transitions.delete("Table")
@@ -11,7 +15,7 @@ class Syntactic
         # inicializa a gramática
         @grammar = {
             "1" => {
-                "P'" => ["P"] 
+                "P'" => ["P"]
             },
             "2" => {
                 "P" => ["inicio", "V", "A"],
@@ -24,66 +28,84 @@ class Syntactic
             },
             "5" => {
                 "LV" => ["varfim", ";"],
+                "rule" => "rule5"
             },
             "6" => {
                 "D" => ["id", "TIPO", ";"],
+                "rule" => "rule6"
             },
             "7" => {
                 "TIPO" => ["inteiro"],
+                "rule" => "rule7_8_9"
             },
             "8" => {
                 "TIPO" => ["real"],
+                "rule" => "rule7_8_9"
             },
             "9" => {
                 "TIPO" => ["lit"],
+                "rule" => "rule7_8_9"
             },
             "10" => {
                 "A" => ["ES", "A"],
             },
             "11" => {
                 "ES" => ["leia", "id", ";"],
+                "rule" => "rule11"
             },
             "12" => {
                 "ES" => ["escreva", "ARG", ";"],
+                "rule" => "rule12"
             },
             "13" => {
                 "ARG" => ["literal"],
+                "rule" => "rule13"
             },
             "14" => {
                 "ARG" => ["num"],
+                "rule" => "rule14"
             },
             "15" => {
                 "ARG" => ["id"],
+                "rule" => "rule15"
             },
             "16" => {
                 "A" => ["CMD", "A"],
             },
             "17" => {
                 "CMD" => ["id", "rcb", "LD", ";"],
+                "rule" => "rule17"
             },
             "18" => {
                 "LD" => ["OPRD", "opm", "OPRD"],
+                "rule" => "rule18"
             },
             "19" => {
                 "LD" => ["OPRD"],
+                "rule" => "rule19"
             },
             "20" => {
                 "OPRD" => ["id"],
+                "rule" => "rule20"
             },
             "21" => {
                 "OPRD" => ["num"],
+                "rule" => "rule21"
             },
             "22" => {
                 "A" => ["COND", "A"],
             },
             "23" => {
                 "COND" => ["CABEÇALHO", "CORPO"],
+                "rule" => "rule23"
             },
             "24" => {
-                "CABEÇALHO" => ["se", "(", "EXP_R", ")", "então"],
+                "CABEÇALHO" => ["se", "(", "EXP_R", ")", "entao"],
+                "rule" => "rule24"
             },
             "25" => {
                 "EXP_R" => ["OPRD", "opr", "OPRD"],
+                "rule" => "rule25"
             },
             "26" => {
                 "CORPO" => ["ES", "CORPO"],
@@ -101,8 +123,6 @@ class Syntactic
                 "A" => ["fim"]
             }
         }
-
-        @lex = lex
     end
 
     def run()
@@ -121,6 +141,7 @@ class Syntactic
 
                 if action == "S"
                     stack << args.to_i
+                    @sem.attrs << tuple
 
                     # chamada do léxico que retorna uma hash {:lexeme, :token, :type}
                     tuple = lex.get()
@@ -133,6 +154,10 @@ class Syntactic
                     for i in 0..reduction.values[0].length-1
                         stack.pop
                     end
+
+                    if reduction.has_key?("rule")
+                        @sem.method(reduction["rule"]).call(reduction.keys[0].to_s, reduction.values[0].length)
+                    end
                     
                     stack << @transitions[stack.last.to_i][reduction.keys[0]]
 
@@ -141,12 +166,12 @@ class Syntactic
                 elsif action == "A"
                     return
                 else
-                    puts "\n\033[31;1mErro [" + state.to_s + token.to_s + "]:\033[0m"
+                    @lex.error("syn", tuple[:lexeme].to_s, state.to_s + token.to_s, type="unknown")
                     return
                 end
 
             else
-                puts "\n\033[31;1mErro [" + state.to_s + token.to_s + "]:\033[0m"
+                @lex.error("syn", tuple[:lexeme].to_s, state.to_s + token.to_s, type="unexpected")
                 break
             end
         end
