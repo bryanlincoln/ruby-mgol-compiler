@@ -1,7 +1,7 @@
 # MGOL Compiler
-An MGOL to C compiler using Ruby. This program performs lexic, syntatic and semantic analysis using predefined rules and finite automatas 
-(the syntax state machine was hand-crafted as part of the project, and you may check it [here](Syntax%20State%20Machine.pdf)). 
+An MGOL to C compiler using Ruby. This program performs lexic, syntatic and semantic analysis using predefined rules and finite automatas. 
 It's actually a transpiler since C code is generated as output, rather than machine code. 
+The syntax state machine was hand-crafted as part of the project and you may check it [here](Syntax%20State%20Machine.pdf).
 MGOL is a language definition we used to learn compilers throughout the course. 
 
 ## Usage
