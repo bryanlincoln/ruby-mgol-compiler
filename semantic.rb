@@ -29,12 +29,12 @@ class Semantic
         @indent = 0
     end
 
-    def save()
+    def save(filename)
         unless @lex.noError
             return
         end
 
-        file = File.open("PROGRAMA.C", 'w')
+        file = File.open(filename + ".c", 'w')
         if file.closed?
             puts "\033[31;1mErro ao abrir o arquivo de saída.\033[0m"
         end
@@ -51,7 +51,7 @@ class Semantic
         end
 
         file.close
-        puts "\033[32;1mGerado PROGRAMA.C\033[0m"
+        puts "\033[32;1mGerado " + filename + ".c\033[0m"
     end
 
     def newTemp(type) 

@@ -10,18 +10,21 @@ if $PROGRAM_NAME == __FILE__
         exit()
     end
 
+    filename = ARGV[0]
+
     # verifica se o arquivo existe
-    unless File.file?(ARGV[0])
-        puts "\033[31mO arquivo \"\033[31;1m" + ARGV[0] + "\033[0m\033[31m\" não existe."
+    unless File.file?(filename)
+        puts "\033[31mO arquivo \"\033[31;1m" + filename + "\033[0m\033[31m\" não existe."
         exit()
     end
 
-    lex = Lex.new(ARGV[0])
+    lex = Lex.new(filename)
     sem = Semantic.new(lex)
     syn = Syntactic.new(lex, sem)
 
     syn.run()
-    sem.save()
+    sem.save(File.basename(filename, File.extname(filename)))
 
-    # Pry::ColorPrinter.pp(lex.table)
+    puts "Lexic table:"
+    Pry::ColorPrinter.pp(lex.table)
 end 
